@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+
+<ul>
+    {{if .Fail.Term}}
+    <li>Passed: {{range .Fail.Courses}}</li>
+    {{.Name}} - {{.Number}} - {{.Units}}
+    {{end}}
+    {{else}}
+    <li>Faild: {{range .Spring.Courses}}</li>
+        {{.Name}} - {{.Number}} - {{.Units}}
+
+    {{end}}
+    {{end}}
+</ul>
+
+</body>
+</html>

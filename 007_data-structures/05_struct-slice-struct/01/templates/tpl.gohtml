@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>struct of slice of structs</title>
+</head>
+<body>
+    <ul>
+        {{range .Wisdom}}
+        <li>{{.Name}} - {{.Motto}}</li> 
+        {{end}}
+    </ul>
+    <ul>
+        {{range .Transport}}
+        <li>{{.}}</li>
+        <li>{{.Manifacturer}} - {{.Model}} - have {{.Doors}} doors</li>
+        {{end}}
+    </ul>
+</body>
+
+</html>

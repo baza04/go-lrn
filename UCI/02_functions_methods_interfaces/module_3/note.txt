@@ -1,0 +1,144 @@
+*** Classes and Encapsulation ***
+
+Classes -> properties(variables) and behaviour(methods)
+    Data and funcs
+    classes is just template
+    contain just fields of data  (for using or filling it in future but empty now)
+
+Objects -> instance of class
+    contain real data
+
+Encapsulation -> protect data from programmer
+    data can be accesse only using  methods
+    
+
+*** Support for Classes ***
+
+Association Methods with Data
+    methods recieve type that it is associated with
+
+    type MyInt int
+
+    func (mi MyInt) Double() int {
+
+    }
+
+    func main() {
+        v := MyInt(3)
+        fmt.Println(v.Double())
+    }
+
+Implicit method arg
+    object v is implicit arg to method
+    call by value
+
+Encapsulation -> Controlling Access
+    can define public funcs to allow acces to hidden data
+
+    package data
+
+    var x int = 1
+
+    func PrintX() {fmt.Println(x)}
+
+    package main
+    import "data"
+    func main() {
+        data.PrintX()
+    }
+
+Controlling Access with lower case name
+    package data
+    type Point struct {
+        x, y float64
+    }
+
+    func (p *Point) InitMe(xn, xy float64) {
+        p.x = xn
+        y.x = yn
+    }
+
+    func (p *Point) Scale(v float64) {
+        p.x = p.x * v
+        p.y = p.y * v
+    }
+
+    func (p *Point) PrintMe() {
+        fmt.Println(p.x, p.y)
+    }
+
+    package main
+    func main() {
+        var p data.Point
+        p.InitMe(3,4)
+        p.Scale(2)
+        p.PrintMe()
+    }
+
+
+*** Point ***
+
+Limitations of Methods
+    Method can`t modify the data inside the reciever if methods recieve only copy of object not pointer
+
+    func (p Point) Offset() {}  -> object
+    func (p *Point) Offset() {} -> pointer to object
+    
+    func main() {
+        p1 := Point(3,4)
+        p1.Offset(5)
+    }
+
+    object value may be to large to copying
+    copying may be slow
+
+
+*** Point Receivers, Referencing, Dereferencing ***
+
+no need to reference
+
+good practies
+    1) all methods for a type have pointer reciever or
+    2) all methods for a type have non-pointer reciever
+
+    mixing pointer/non-pointer reciever for a type will get confusing
+
+
+HW3
+    Напишите программу, которая позволяет пользователю получать 
+    информацию о заранее заданном наборе животных. Предопределены
+    три животных: корова, птица и змея. Каждое животное может
+    есть, двигаться и говорить. Пользователь может отправить запрос,
+    чтобы узнать одну из трех вещей о животном:
+        1) пищу, которую оно ест,
+        2) его способ передвижения
+        3) звук, который оно издает, когда оно говорит. 
+    Следующая таблица содержит трех животных и связанные с ними
+    данные, которые должны быть жестко закодированы в вашей программе.
+
+    Животное 	Съеденная еда 	    Метод передвижения 	Разговорный звук
+    корова 	    трава 	            ходить 	            мычание
+    птица 	    черви 	            летать 	            писк
+    змея 	    мышей 	            скользить 	        hsss
+
+    Ваша программа должна предоставить пользователю подсказку «>»,
+    чтобы указать, что пользователь может ввести запрос. Ваша 
+    программа принимает по одному запросу от пользователя, 
+    распечатывает ответ на запрос и распечатывает новое приглашение. 
+    Ваша программа должна продолжаться в этом цикле вечно. Каждый 
+    запрос от пользователя должен представлять собой одну строку, 
+    содержащую 2 строки. 
+        Первая строка - это название животного: 
+            «корова», «птица» или «змея». 
+        Вторая строка - это название запрашиваемой информации о животном:
+            «есть», «двигаться» или «говорить». 
+    
+    Ваша программа должна обрабатывать каждый запрос, распечатывая запрошенные данные.
+
+    Вам понадобится структура данных для хранения информации о каждом
+    животном. Создайте тип под названием Animal, который представляет 
+    собой структуру, содержащую три поля: еда, движение и шум, все из
+    которых являются строками. Создайте три метода: Eat () , Move () 
+    и Speak () . Тип приемника всех ваших методов должен быть вашим 
+    типом Animal. Метод Eat () должен печатать еду животного, метод 
+    Move () должен печатать движения животного, а метод Speak () 

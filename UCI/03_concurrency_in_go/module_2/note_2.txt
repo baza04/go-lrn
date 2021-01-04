@@ -1,0 +1,74 @@
+    *** Processes ***
+
+processes - instance of running program
+
+Things unique to a program:
+    - virtual address space
+    - code, stack, heap, shared libraries
+    - programm counter -> registr what a instruct you exec right now
+
+
+Operation system
+    allow many processes to exec concurrently
+    process are switched quickly
+    scheduler
+
+
+    *** Scheduler ***
+
+processor have many of tasks, but of it may have more priority than others
+    
+    *** Context switcher ***
+
+when we have few processes, each of them have some state (context)
+and we want to switch form one process to another we need to save state
+to next time start from place when stop early,
+and switch to new process and read his state, and again and again
+
+when process is start timer is turned on
+
+    *** Concurrensy Basics. Threads and Goroutines ***
+ 
+ Threads vs. Processes
+    Threads share some context
+
+        each proc have: - [virtual memory, file descriptors]
+                        - [Stack, data registers, code]
+
+        one process can have few threads
+            each threads have share [virtual memory and file descriptors]
+            and local (unique context) [Stack, data registers, code] this context much less then context between two processes
+
+    switching between processes may be slow, but
+    switching between threads are very fast
+
+
+Goroutines
+    when Go code running CPU exec process with one main thread (CPU control - schedule CPU threads), but
+    in this threads Go can exec many goroutines
+
+Go Runtime Scheduler
+    Go Runtime Scheduler schedule goroutines
+
+
+    *** Interleavings ***
+
+if result of programm depended of goroutine execution order it will be race condition
+
+goroutines are communicate by var (not sure) 
+if few goroutines are use one variable it go to race condition
+
+
+/*
+В целом когда идет запуск каждо из go рутин он происходит не зависимо от всех оставльных исполняемых процессов
+к слову функция main запускается так же, в нашем коде мы запустили 10 go - рутин при этом порядок их окончания
+может отличаться от порядка запуска что мы и наблюдаем. Причина как мне кажется в том что все независимые go -
+ рутины затрачивают разное время на запуск необходимых пакетов в go и выполнение своих задач
+
+Условия состязания возникают, когда результат выполнения программы не всегда одинаков при каждом ее запуске.
+Условия гонки возникают потому, что конечный результат зависит от неопределенного порядка выолнение горутин.
+Как вы можете видеть в этой программе, функции сомеФунс требует передачи строки и числа.
+Проблема начинается, когда запускается сразу 10 горутин. По логике программа должна печатать строку "первый" с числом, затем строку "второй" и число, но на деле все не совсем так.
+Но поскольку порядок выполнения не является детерминированным, и мы не контролируем их выполнения ни блокировкой, ни таймером, есть вероятность, любая из 10 горутин выполнится раньше тех которые были запущены намного раньше.
+Вы можете увидеть условия гонки при запуске этой программы.
+*/

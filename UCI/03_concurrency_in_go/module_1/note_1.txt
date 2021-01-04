@@ -1,0 +1,31 @@
+*** Concurrency ***
+
+Parallel Execution
+    two progs execute in parallel at the same time
+    one CPU core can execute one prog
+
+    some thing can`t be parallelyzed
+        example: you can`t wash and dry one dish at one moment
+        you can wash then dry by two people
+
+Speedup without Parallelism
+    
+уменьшение слоя диэлектрика приводит к утечкам тока, рост мощности и перегрев
+
+при экспоненциальном увеличении моощности процессеров их стоймость уменьшается соразмерно
+
+Постоянно критиковались не только финансовые стороны этого закона, но и невозможность переложить его на другие сферы
+
+every 2 years count of transistors in CPU will increase to double and cost will cheaper
+
+grouth will exponentialy
+
+
+
+////////////////
+сигналы двигаются со скоростю света
+рост числа транзисторов за счет у меньшения -> бесконечное уменьшение размеров трназисторов невозможно
+
+Moore's prediction has been used in the semiconductor industry to guide long-term planning and to set targets for research and development, thus functioning a bit like a self-fulfilling prophecy. Advancements in digital electronics, such as the reduction in quality-adjusted microprocessor prices, the increase in memory capacity (RAM and flash), the improvement of sensors, and even the number and size of pixels in digital cameras, are strongly linked to Moore's law. These step changes in digital electronics have been a driving force of technological and social change, productivity, and economic growth. 
+
+Microprocessor architects report that since around 2010, semiconductor advancement has slowed industry-wide below the pace predicted by Moore's law.[20] Brian Krzanich, the former CEO of Intel, cited Moore's 1975 revision as a precedent for the current deceleration, which results from technical challenges and is "a natural part of the history of Moore's law".[33][34][35] The rate of improvement in physical dimensions known as Dennard scaling also ended in the mid-2000s. As a result, much of the semiconductor industry has shifted its focus to the needs of major computing applications rather than semiconductor scaling.[28][36][20] Nevertheless, leading semiconductor manufacturers TSMC and Samsung Electronics have claimed to keep pace with Moore's law[37][38][39][40][41][42] with 10 nm and 7 nm nodes in mass production[37][38] and 5 nm nodes in risk production.[

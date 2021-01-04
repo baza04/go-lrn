@@ -1,0 +1,275 @@
+*** Polymorphism ***
+
+Ability for an object to have different forms depending on the context
+    Area()
+    Triangle.Area()
+    Rectangle.Area()
+
+    Indentical at a high-level of abstraction
+    Defferent at a low-level of abstraction
+
+Inheriance
+    subclass inherits the methods/data
+        Speak(): Cat and Dog
+        Cat.Speak()
+        Dog.Speak()
+
+Overriding
+    Subclass redefines a method inherit from superclass
+        Cat.Speak() -> meow
+        Dog.Speak() -> woof
+
+        Speak() method is polimorfic -> has different implement for each class
+
+
+*** Interfaces ***
+
+Interfaces
+    Set of methods signatures
+        name, parameters, return value
+        implementation is not defined
+
+Satisfying an Interface
+    type satisfies an interface if type defines all methods specified in the interface
+        same methods signatures
+    
+    Similar to inheritance with Overriding
+
+Defining an Interface type
+    type Shape2D interface {
+        Area() float64
+        Perimeter() float64
+    }
+
+    type Triangle {...}
+    
+    func (t *Triangle) Area() float64 {}
+    func (t *Triangle) Perimeter() float64 {}
+
+
+*** Interface vs. Concrete Types ***
+
+Concrete Types
+    Specify the exact representation of the data and methods
+    Complete method implementation is included
+
+Interface Types
+    Specify some methods signatures
+    implementations are abstracted
+
+Interface value
+    can be treated like other values
+        assigned to variable
+        passed, returned
+
+    interface value have two components
+        dynamic type: Concrete type which it is assigned
+        dynamic value: value of the dynamic type
+
+        struct or some else type for method executing   -> dynamic type
+        object of this type                             -> dynamic value 
+
+
+Defining an Interface type
+    type Speaker() interface {
+        Speak()
+    }    
+
+    type Dog struct {
+        name string
+    }
+
+    func (d *Dog) Speak() {
+        fmt.Println(d.name)
+    }
+
+    func main() {
+        var s1 Speaker
+        var d1 Dog{"Brian"}
+        s1 = d1
+        s1.Speak()
+    }
+
+Interface with nil Dynamic value
+    An interface can have a nil dynamic type
+
+    var s1 Speaker
+    var d1 *Dog
+    s1 = d1
+
+    !!! d1 it`s just pointer, but ut hasn`t data in
+
+Nil Dynamic value
+
+    func (d *Dog) Speak() {
+        if d == nil {
+            fmt.Println("<noise>")
+        } else {
+            fmt.Println(d.name)
+        }
+    }
+
+    var s1 Speaker
+    var d1 *Dog
+    s1 = d1
+    s1.Speak()
+
+Nil Interface value
+    Interface with dynamic type    
+    Very different from an interface with a nill dynamic value
+
+Nil dynamic value and valid dynamic type
+    var s1 Speaker
+    var d1 *Dog
+    s1 = d1
+
+    Can call a method since type is known
+
+Nil dynamic type -> don`t know who is Speak
+    var s1 Speaker
+    
+    Can`t call a method, runtime error
+
+
+*** Using Interfaces ***
+
+Ways to use interface
+    need a func which takes multiple types of parameters
+    we have func foo() which need to work with types X and Y ->
+    -> so we create interface Z
+
+Pool in a Yard
+    we need put pool in Yard
+    create FitInYard() func -> takes shape as arg
+        but shape may be any: rectangle, triangle, circle, etc.
+
+        type Shape2D interface {
+            Area() float64
+            Perimeter() float64
+        }
+
+        type Triangle struct {...}
+
+        func (t *Triangle) Area() float64 {...}
+        func (t *Triangle) Perimeter() float64 {...}
+
+        type Rectangle struct {...}
+        func (r *Rectangle) Area() float64 {...}
+        func (r *Rectangle) Perimeter() float64 {...}
+
+        func FitInYard(s Shape2D) bool {
+            if (s.Area() > 100 && s.Perimeter() > 100) {
+                return true
+            }
+            return false
+        }
+
+Empty Interface
+    Empty interface specifies no methods
+    All types satisfy the empty interface
+    use it to have a func accept any type as a parameter
+
+    func PrintMe(val interface{}) {
+        fmt.Println(val)
+    }
+
+
+*** Type Assertions ***
+
+Exposing type differences
+    example: graphics program
+    DrawShape() will draw any shape
+
+    underlying API has different drawing funcs for each shape
+
+    func DrawShape(s Shape2D) {...}
+
+    subfuncs:
+        func DrawRect(r Rectangle) {...}
+        func DrawTriangle(r Rectangle) {...}
+
+    Concrete type must be determined
+
+Type Assertions for Disambiguation
+    type assertions can be used to determine
+    and extract the underlying concrete type
+
+=============================================
+    func DrawShape(s Shape2D) bool {
+        rect, ok := s.(Rectangle)
+        if ok {
+            DrawRect(rect)
+        }
+        tri, ok := s.(Triangle)
+        if ok {
+            DrawTriangle(tri)
+        }
+    }
+===============================================
+Type Switch
+
+    func DrawShape(s Shape2D) bool {
+        switch := sh := s.(type) {
+            case Rectangle:
+                DrawRect(sh)
+            case Triangle:
+                DrawTriangle(sh)
+        }
+    }
+
+===============================================
+
+*** Error Handling ***
+
+Error Interface
+
+    type error interface {
+        Error() string
+    }
+
+
+hw4
+
+Напишите программу, которая позволяет пользователю создавать набор животных
+и получать информацию об этих животных. У каждого животного есть имя, оно 
+может быть коровой, птицей или змеей. С помощью каждой команды пользователь 
+может либо создать новое животное одного из трех типов, либо запросить 
+информацию о животном, которое он / она уже создал. У каждого животного есть 
+уникальное имя, определяемое пользователем. Обратите внимание, что пользователь
+может определять животных выбранного типа, но типы животных ограничены коровой, 
+птицей или змеей. В следующей таблице приведены три типа животных и связанные 
+с ними данные.
+
+    Животное 	Съеденная еда 	    Метод передвижения 	Разговорный звук
+    корова 	    трава 	            ходить 	            мычание
+    птица 	    черви 	            летать 	            писк
+    змея 	    мышей 	            скользить 	        hsss
+
+
+Ваша программа должна предоставить пользователю подсказку «>», чтобы указать,
+что пользователь может ввести запрос. Ваша программа должна принимать по одной
+команде от пользователя, распечатывать ответ и выводить новое приглашение в
+новой строке. Ваша программа должна продолжаться в этом цикле вечно. Каждая
+команда от пользователя должна быть либо командой «newanimal», либо командой «query».
+
+Каждая команда newanimal должна быть одной строкой, содержащей три строки. 
+Первая строка - «новое животное». Вторая строка - это произвольная строка, 
+которая будет именем нового животного. Третья строка - это тип нового животного: 
+«корова», «птица» или «змея». Ваша программа должна обрабатывать каждую команду 
+newanimal, создавая новое животное и печатая «Создал его!» на экране.
+
+Каждая команда «запрос» должна быть одной строкой, содержащей 3 строки. Первая 
+строка - это «запрос». Вторая строка - это название животного. Третья строка - 
+это название запрашиваемой информации о животном: «есть», «двигаться» или «говорить». 
+Ваша программа должна обрабатывать каждую команду запроса, распечатывая запрошенные данные.
+
+Определите тип интерфейса под названием Animal, который описывает методы животного. 
+В частности, Animal интерфейс должен содержать методы Eat(), Move() и Speak(), 
+которые не принимают аргументов и не возвращают значений. Метод Eat () должен 
+печатать еду животного, метод Move () должен печатать движения животного, а метод 
+Speak () должен печатать звуки разговора животного. Определите три типа Корова , 
+Птица и Змея . Для каждого из этих трех типов определите методы Eat () , Move () и 
+Speak (), чтобы все типы Cow , Bird и Snake удовлетворяли Animal интерфейсу. 
+Когда пользователь создает животное, создайте объект соответствующего типа. Ваша 
+программа должна вызывать соответствующий метод, когда пользователь выдает команду
+запроса

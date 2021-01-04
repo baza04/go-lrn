@@ -1,0 +1,35 @@
+    *** Slices ***
+
+Slices a window to larger underlying array
+    pointer     -> indicate start of slice
+    length      -> num of elements in slice
+    capacity    -> max num of els in slice
+
+Make
+    make array have two args
+        type: []int, []string
+        len: 1, 10, 20
+
+    make slice have three args:
+        type, len, cap
+
+Append only to slices
+    append add new elements to end slice
+        if slice is empty appended element wiil be first
+        if slice have elements new element add after it
+
+    
+    *** Hash Tables ***
+
+Hash it`s table using Hash function
+    maybe it use array and with Hash func set choosen key unstead of index
+
+
+    *** Maps ***
+
+var IdMap map[string]int
+IdMap = make(map[string]int)
+
+idMap := map[string]int{
+    "Den": 123
+}

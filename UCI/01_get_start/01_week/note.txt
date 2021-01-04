@@ -1,0 +1,114 @@
+                                *** ADVANTAGES ***
+Why should choose Go
+    fast run
+    garbage collection
+    simple objects
+    concurrency
+
+Sofware translation
+    machine lang     -> direct execute in CPU (represented in binary)
+    acembler lang    -> easier to read
+                        equivaent to machine lang (very close to machine lang)
+    high-level langs -> much easier to use (c/c++, java, python, ...)
+
+Compiled 
+    translate one time
+    fast
+
+Interpreted
+    translate while the code running
+    manage memory automatically
+    Infer var types (maybe it dynamic typing !!!not sure )
+    
+Go is between Compiled and Interpreted lang types
+
+Garbage collection (automatic memory management)
+    think about where memory should be dellocated
+
+Manual memory managment is hard
+    dellocated to early -> flase memory access or opposite
+
+Go include garbage collection like of Interpreted lang
+
+
+                                *** OBJECTS ***
+
+*OOP
+    Organize your code through "Encapsulation"
+    group data and funcs
+       
+Go doesn`t have class, but have structs
+    structs is just data but it`s simplified implementation of classes
+        no inheritance
+        no constructors
+        no generics
+         
+
+                                *** CONCURRENCY ***
+
+Parallelism
+    use few cores of CPU to execute multiple tasks 
+    
+Concurrency managment of multiple tasks at the same time
+    tasks a live at the same time, but it could be not executing
+    
+Concurrency in Go
+    - Managment of task execution
+    - Communication between tasks
+    - Synchonization between tasks
+
+    *Go incluse concurrency primitives
+    *Goroutines (tasks)
+    *Channels -> use to communication between tasks
+    *Select enable task synchonization 
+
+
+                                *** WORKSPACE ***
+
+Three subdirectories
+    src -> source code
+    pkg -> contain libraries
+    bin -> executables files
+
+GOPATH variable
+
+Packages
+    group of related src code
+    each pkg can be imported by other pkg
+
+    
+                                *** GO TOOL ***
+
+Go tools commands:
+    go build (without arguments or with some pkgs or files)
+    go doc -> get docs of current go code
+    go fmt -> format src code
+    go get -> download and install pkgs
+    go list -> list all installed pkgs
+    go run -> compile and run execute 
+    go test -> runs tests in files ending to "_test.go"
+
+
+                                *** Variable ***
+
+Type Declaration
+    Defining an alias for a type
+    May improve clarity:
+        type Celsius float64
+        type IDnum int
+
+    Can declare vars using the type alias:
+        var temp Celsius
+        var pid IDnum
+
+Initializing Variables
+    initialize in the declaration:
+        var x int = 10
+        var y = 11
+
+    init after declaration:
+        var x int
+        x = 100
+
+    short declaration:
+        x := 111

@@ -1,0 +1,138 @@
+        *** Thread in Go ***
+
+Creating Goroutine
+    main()
+    go someFunc()
+
+
+    //foo func block a = 2 
+    func main() {
+        a := 1
+        foo()
+        a = 2
+    }
+    
+
+    //foo func can't block a = 2 
+    func main() {
+        a := 1
+        go foo()
+        a = 2
+    }
+
+
+        ***  Timing with Goroutine ***
+
+adding delay to wait for a goroutine is bad
+Timing is not determenistic
+need formal synchronization construct 
+
+
+        ***  Synchronization Example ***
+
+task1
+    x = 1
+    x += 1
+    GLOBAL EVENT
+
+task2 
+    if GLOBAL EVENT {
+        print x
+    }
+
+        ***  Wait Groups ***
+
+Sunc WaitGroups
+    sync pkg contain func to synchronization between goroutines
+
+    sync.WaitGroup forces a goroutine to wait others
+
+WaitGroup using:    
+    var wg sync.WaitGroup
+
+    func main() {
+        for i := 0; i < 3; i++ {
+            wg.Add(1)
+            go someFunc(i)
+            wg.Wait()
+        }
+    }
+
+    func someFunc(i int) {
+        fmt.Printf("routine #%d\n", i)
+        wg.Done()
+    }
+
+
+    func foo(wg *sync.WaitGroup) {
+        print("...")
+        wg.Done()
+    }
+
+    func main() {
+        var wg sync.WaitGroup
+        wg.Add(1)
+        go foo(&wg)
+        wg.Wait()
+        print("main")
+    }
+
+
+        ***  Communication  ***
+
+Goroutines usually work together to perform a bigger task1
+Often need send some data to colloborate
+
+
+        ***  Channels  ***
+
+Transfer data between Goroutines
+    channels are typed
+    c := make(chan int)
+
+    send to channel:  c <- 3
+    get from channel: x := <- c
+
+    func mult(x, y int, c chan int) {
+        c <- x * y
+    }
+
+    func main() {
+        c := make(chan int)
+        mult(1, 2, c)
+        mult(3, 4, c)
+
+        x := <- c
+        y := <- c
+    
+        fmt.Println()
+    }
+
+
+        ***  Blocking Channels  ***
+
+Unbuffered Channels
+    Unbuffered channels can`t hold data in transit
+    default is Unbuffered
+
+    sending block until data is recieved
+    recieve block until data is send
+    
+    channel communication is synchronization
+    block like WaitGroup
+    Recieve and ignoring the result the same as a Wait()
+
+
+        ***  Buffered Channels  ***
+
+Channels Capacity
+    Capacity is number of objects it can hold in transit
+        c := make(chan int, 3)
+        sending block if chan buffer is full
+        recieving block only if buffer is empty
+
+Using of Buffering
+
+253 4 76 30 64 19 7 84 163 69 71 82 57 22
+-5849 -561 2564841 8841 51 219 985 1 8 874 21 548
+	fmt.Printf("unsorted: %v,\t sorted: %v\n", arr, sorted)

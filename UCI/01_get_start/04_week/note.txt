@@ -1,0 +1,111 @@
+                               *** RFCs ***
+
+RFC - global standats for techonologies
+    HTML
+    URI
+    HTTP
+
+Protocols Packages
+    net/http    -> http.Get(www.google.com)
+    net         -> net.Dial("tcp", "uci.edu:80")
+
+JSON -> JavaScript Object Notation
+    RDC 7159
+    format to represent structure information
+    Attribure-value pairs
+        struct or map
+    Basic value types
+
+
+                                *** JSON ***
+JSON
+    all unicode
+    compact
+    types can be combined recursively
+        arr of struct, struct in struct
+    
+JSON Marshaling -> object to []byte
+    genereting JSON from object
+
+    type Person struct {
+        name, addr, phone string
+    }
+
+    p1 := Person{"Sam", "NY", "444"}
+
+    barr, err := json.Marshal(p1)
+
+JSON UnMarshaling -> []byte to object
+    var p2 Person
+    err ;= json.Unmarshal(barr, &p2)
+
+    !!! object p2 must fit to incoming json structure
+    has the same fields etc.
+
+
+                                *** File Access, ioutil ***
+
+Files
+    Open()  -> get handle to access
+    Read()  -> read bytes into []byte
+    Write() -> write []byte into file
+    Close() -> release handle
+    Seek()  -> move read/write head
+
+
+ioutil package
+    data, err := ioutil.ReadFile("some.txt")
+    data -> []byte
+    
+    !!! Large files cause a problem with memory !!!
+
+    data = "Hello World!"
+    err := ioutil.WriteFile("record_file.txt", data, 0777)
+    []byte -> file
+    create file, set UNIX-style permission
+
+os package
+    os.Open() -> open file return File type
+    os.Close()
+    os.Read() -> read to []byte
+
+    !!! has control of reading amount
+
+    os.Write() -> []byte to file
+
+
+    f, err := os.Open("name.txt")
+    bArr := make([]byte, 10)
+    nb, err := f.Read(bArr) // nb -> num of readed bytes
+    f.Close()
+
+    !!! Read() will read data only with bArr length
+
+os File Create/Write
+    f, err := os.Create("name.txt")
+    bArr := []byte{1,2,3}
+    bytesNum, err := f.Write(bArr)        -> get date from bArr bytes array
+    bytesNum, err := f.WriteString("Hi")  -> get string
+
+    
+hw4
+    Напишите программу, которая предлагает пользователю сначала ввести имя, а затем адрес.
+    Ваша программа должна создать map и добавить к ней имя и адрес с помощью "ключевых слов" «имя»
+    и «адрес» соответственно. Ваша программа должна использовать Marshal () для создания
+    объекта JSON из map, а затем ваша программа должна распечатать объект JSON. 
+
+    =======================================================================================
+
+    Напишите программу, которая считывает информацию из файла и представляет ее в виде массива
+    структур. Предположим, что существует текстовый файл, содержащий серию имен. Каждая строка
+    текстового файла имеет имя и фамилию в указанном порядке, разделенные одним пробелом в строке.
+
+    Ваша программа определит структуру имени, которая имеет два поля,
+    fname для имени и lname для фамилии. Каждое поле представляет собой строку размером 20 (символов).
+
+    Ваша программа должна запросить у пользователя имя текстового файла. Ваша программа будет
+    последовательно читать каждую строку текстового файла и создавать структуру, содержащую имя и
+    фамилию, найденные в файле. Каждая созданная структура будет добавлена ​​в срез, и после того,
+    как все строки будут прочитаны из файла, ваша программа будет иметь срез, содержащий по одной
+    структуре для каждой строки в файле. После прочтения всех строк из файла ваша программа должна
+    перебрать ваш фрагмент структур и вывести имя и фамилию, найденные в каждой структуре.

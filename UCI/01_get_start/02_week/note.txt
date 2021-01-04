@@ -1,0 +1,175 @@
+                                *** POINTERS ***
+
+POINTERS
+    pointer -> adress to data in memory
+    & operator -> return addr of var/func
+    * operator -> return data from addr
+
+    var x int = 1
+    var y int
+    var ip *int -> pointer to int
+
+    ip = &x
+    y = ip // y = 1
+
+    ptr := new(int)
+    *ptr = 3
+
+                                *** VARIALBE SCOPE ***
+
+Variable scope
+    is part of code between {} brackets:
+        - if, else, switch, select
+        - blocks, for, funcs
+        - file, universe
+
+
+                                *** DEALLOCATING MEMORYS ***
+
+Stack is dedicated to func calls
+    store local variables
+    deallocated after func complete
+
+Heap is persistent
+    data in heap must be deallocated after using
+    some langs doesn`t have garbage collection and do it by:
+        x = malloc(32)
+        free(x)
+    error-prone, but fast
+
+
+                                *** GARBAGE COLLECTION ***
+
+Garbage Collection
+    in interpreted langs this is done by the interpreter
+        Python, Java VM
+    easy for programmer (but it slow runing)
+    C/C++ do it by hands
+
+Go Garbage Collection
+    go compiled but have GC
+    implementation is fast
+    compiler determines where var in stack or heap
+     
+
+                                *** COMMENTS, PRINTING, INTEGERS ***
+
+Comments
+    just for undestanding
+    ignore by compiler
+    single/muplti line Comments // /*Block comments*/
+
+Printing
+    import from fmt
+    printf() has conversion characters for each argument
+
+Integers
+    Generic int declaration
+        var x int
+    Different lengs and signs:
+        int8, ..., int64
+        uint8, ..., uint64
+
+
+                                *** INTS, FLOATS, STRINGS ***
+
+Type conversion
+    Most binary operations need operands of the same type
+    including assignments
+        var x int16 = 1
+        var y int32 = 2
+        x = y
+    convertion: 
+        x = int16(y)
+
+Floating Point
+    float32 -> ~ 6 digits of precision
+    float64 -> ~ 15 digits of precision
+
+    scientific notation:
+    var x int64 = 123.34 = 1.2345e2
+    
+ASCII
+    each ASCII character is (7) 8-bit number
+        'A' = 0x41
+
+Unicode used to coding not english characters
+    each characters is 32-bit code
+    UTF-8 is variable length
+        8-bit UTF codes are same as ASCII
+    Code point - Unicode characters
+    Rune - code point in Go
+
+Strings
+    Read only
+    Often meant to be printed
+    
+                                *** STRING PACKAGES ***
+
+Unicode Package
+    IsDigit()
+    IsSpace()
+    IsLetter()
+    IsLower()
+    IsPunct()
+
+Conversion
+    ToLower()
+    ToUpper()
+
+String Package
+    Compare(a, b) -1, 0, 1
+    Containts()
+    HasPrefix()
+    Index()
+
+String Manipilations
+    Replace()
+    TrimSpace()
+
+Strconv Package
+    Atoi()
+    FormatFloat()
+    ParseFloat()
+
+
+                                *** STRING PACKAGES ***
+
+CONSTANTS
+    iota        
+        const (
+            a int = 1
+            b int = iota
+            c
+)
+
+
+                                *** CONTROL FLOW ***
+
+Control Structures
+    Statement which alter control flow
+        if, else, switch
+
+    For loops
+        for {} for <cond> for <init> <cond> <update> {} for range {}
+
+1 
+1
+1
+=1
+1
+2
+1
+=2
+2
+3
+2
+=3
+3
+5
+3
+=4
+5
+8
+5
+=5

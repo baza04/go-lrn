@@ -1,0 +1,280 @@
+        ***  Synchronized Communication  ***
+
+Block on Channels
+    c := make(chan int)
+    for i := range c {
+        fmt.Println(i)
+    }
+
+    for loop can be infinite
+    so if it we need to close chan to end exec
+        close(c)
+
+    
+Multiple channels
+    can be used from multiple sources
+
+    go func() {
+        c1 <- 3
+    }
+    go func() {
+        c2 <- 5
+    }
+
+    someFunc() {
+        a := <- c1
+        b := <- c2
+        fmt.Println(a*b)
+    }
+
+Select Statement
+    select {
+        case a = <- c1:
+            fmt.Println(a)
+        case b = <- c2:
+            fmt.Println(b)
+    }
+
+
+        ***  Select  ***
+
+Select Send or Recieve
+    select {
+        case a = <- inchan: // if we doesn`t have recieved value input chan blocked
+            fmt.Println("Recieved a")
+        case outchan <- b:  // if nobode read out value chan is blocked
+            fmt.Println("sent b")
+    }
+
+Select with Abort Channel
+    for {
+        select {
+            case a <- c:
+                fmt.Println(a)
+            case <- abort:  // abort it`s special channel to aborting for loop
+                return
+        }
+    }
+
+Default select
+    select {
+        case a = <- c1:
+            fmt.Println(a)
+        case b = <- c2:
+            fmt.Println(b)
+        default:
+            fmt.Println("nop")
+    }
+
+        ***  Mutual Exclution  ***
+
+Gorutines sharing variables
+    sharing vars concurrently can cause problem
+
+Concurrency-safe
+    func can be invoked concurrently without interfering with other gorutines
+
+    var i int
+    var wg sync.WaitGroup
+
+    func inc() {
+        i++
+        wg.Done()
+    }
+
+    func main() {
+        wg.Add(2)
+        
+        go inc()
+        go inc()
+        wg.Wait()
+        
+        fmt.Println(i)
+    }
+
+Granularity of Concurrency
+    Concurrency is on machine code level
+
+    each go code compile to machine code ->
+    -> when machine code use some variables ->
+        -> read from memory
+        -> change value (implement or decrement, etc.)
+        -> write to memory
+
+
+        ***  Mutex  ***
+
+Correct sharing
+    don`t let 2 gorutines write a sharing var at the same time
+    Mutual Exclution
+
+Sync.Mutex
+    Mutex methods
+// var mx sync.Mutex
+// mx.Lock()
+// mx.Unlock()
+
+
+var i int
+var mut sync.Mutex
+func inc() {
+    mut.Lock()
+    i++
+    mut.Unlock()
+}
+
+
+        ***  Once Synchronization  ***
+
+Synchronous Initialization
+    - Initialization can be done inn main() before call gorutines
+    - sync.once
+        once.Do(someFunc)   -> can be called in gorutines
+                               but doesn`t matter how many gorutines
+                               arg of once.Do() will exec only one time
+
+Example:
+
+    var wg sync.WaitGroup
+
+    func main() {
+        wg.Add(2)
+
+        go dostuff()
+        go dostuff()
+        wg.Wait()
+    }
+
+var on sync.Once
+
+func setup() {
+    fmt.Println("Init")
+}
+
+func dostuff() {
+    on.Do(setup)
+    fmt.Println("Stuff")
+    wg.Done()
+}
+
+
+        ***  DeadLock  ***
+
+Circular dependencies
+    cause all involved gorutines to block
+
+        func g1() {
+            c <- something
+            mx.Unlock()
+        }
+
+        func g2() {
+            something <- c
+            mx.Lock()
+        }
+    
+    So g1 wait g2 and g2 wait g1
+    that is DeadLock
+
+DeadLock Exclution:
+
+    func dostuff(c1, c2 chan int) {
+        <- c1
+        c2 <- 1
+        wg.Done()
+    }
+
+    func main() {
+        c1 := make(chan int)
+        c2 := make(chan int)
+        wg.Add(2)
+        go dostuff(c1, c2)
+        go dostuff(c2, c1)
+    
+        wg.Wait()
+    }
+
+DeadLock Detection
+    Go runtime auto detect deadlocks
+    but can`t detect when subset of gorutines are deadlocked
+
+
+        ***  Dining Philosophers  ***
+
+Dining Philosophers Problem
+    Classic problem involving Concurrency and Synchronization
+        5 people have only one chopstick
+
+        representation in code:
+
+            type ChopS struct { sync.Mutex }
+            
+            type Phylo struct {
+                leftCS, rightCS *ChopS
+            }
+
+            func (p Philo) eat() {
+                for {
+                    p.leftCS.Lock()
+                    p.rightCS.Lock()
+                    fmt.Println("eating")
+
+                    p.leftCS.Unlock()
+                    p.rightCS.Unlock()
+                }
+            }
+
+        Initialization in main()
+
+        func main() {
+            CSticks := make([]*ChopS, 5)
+            for i := 0; i < 5; i++ {
+                CSticks[i] = new(ChopS)
+            }
+
+            philos := make([]*Philo, 5)
+            for i := 0; i < 5; i++ {
+                philos[i] = &Philo{CSticks[i], CSticks[(i+1)%5]}
+            }
+
+            for i := 0; i < 5; i++ {
+                go philos[i].eat()
+            }
+        }
+
+        !!! Problem
+        if all 5 Philosophers lock left chopstick in the same time 
+        code go to deadlock
+
+        that problem will exist in circle synchronization
+        so to solve it we need to make that at first ->
+        -> Philosophers get smallest chopstick at this case ->
+        -> Phylo #4 try to take chopstick #0, and come to block
+        -> but philo#3 can eating, etc...
+
+
+Реализуйте проблему обедающего философа со следующими ограничениями / модификациями.
+
+    - Должно быть 5 философов, делящих палочки для еды, 
+    и по одной палочке для каждой смежной пары философов.
+
+    - Каждый философ должен съесть только 3 раза (не в 
+    бесконечном цикле, как мы делали на лекции).
+
+    - Философы берут палочки для еды в любом порядке, а 
+    не сначала с наименьшими номерами (что мы и сделали на лекции).
+
+    - Чтобы есть, философ должен получить разрешение от хоста, 
+    который выполняет свою собственную горутину.
+    
+    - Хозяин позволяет одновременно есть не более 2 философам.
+
+    - Каждый философ пронумерован от 1 до 5.
+
+    - Когда философ начинает есть (после получения необходимых 
+    замков), он печатает «начало есть <число>» в отдельной строке,
+    где <число> - это номер философа.
+
+    - Когда философ заканчивает есть (до того, как он отпустил 
+    замки), он печатает «доедание <число>» в отдельной строке, 
+    где <число> - это номер философа. 

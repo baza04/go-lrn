@@ -1,0 +1,122 @@
+        *** Functions are First-Class ***
+
+First Class
+    funcs can be treated like other types
+    can be created dynamicaly
+    can be passed as arg and returned as value
+    can be stored in data structure
+
+
+        *** Variables nad Functions ***
+
+Declare var as func
+    var funcVar func(int) int
+    func incFn(x int) int {
+        return x + 1
+    }
+
+    func main() {
+        funcVar = incFn
+        fmt.Println(funcVar(1))
+    }
+
+    !!! func is on right-hand side, without ()
+
+
+        *** Functions as Arguments ***
+
+func -> pass to another func as arg
+
+    func applyIt(afunc func (int) int, val int) int {
+        return afunc(val)
+    }
+
+    func incFn(x int) int {return x + 1}
+    func decFn(x int) int {return x - 1}
+
+    func main() {
+        fmt.Println(applyIt(incFn(1)))
+        fmt.Println(applyIt(decFn(2)))
+    }
+
+
+        *** Returning Functions ***
+
+Functions as Return Value
+    
+        *** Special-Purpouse Functions ***
+
+            
+        *** Enviroment of a Functions ***
+
+Closure -> замыкание
+    Enviroment still with the func when func is returnted
+
+
+        *** Variable Argument Number ***
+
+Functions can take a variable num of args
+Use elipsis ... to specify
+treated as a slice inside func
+    
+    func getMax(vars ...int) int {
+        maxV := -1
+        for _, v := range vars {
+            ...
+        }
+        return maxV
+    }
+
+    func main() {
+        getMax(1, 2, 3, 4)
+        getMax([]int{1, 2, 3, 4}...)
+    }
+
+
+        *** Deferrer Function Calls ***
+
+Defer Call
+    Call can be deferrer until the surrounding function completes
+    Typicaly used to clear up activities
+
+Deferrer Call Arguments
+    args of deferrer call are evaluated immmediately
+
+
+================================================================================
+hw
+
+Предположим следующую формулу для смещение s как функция времени t, 
+ускорение a , начальная скорость v o , и начальное смещение s o .
+
+s = ½ при 2 + v o t + s o
+
+Напишите программу, которая сначала предлагает пользователю для ввода
+значений ускорения, начальной скорости и начального смещения. Затем 
+программа должна предложить пользователю ввести значение времени и 
+Программа должна вычислить смещение после введенного времени.
+
+Вам нужно будет определить и использовать функцию называется GenDisplaceFn (),
+который принимает три float64 аргументы, ускорение a, начальная скорость v o
+и начальная смещение s o . GenDisplaceFn () должен возвращать функцию,
+которая вычисляет смещение как функцию времени, принимая заданные значения
+ускорение, начальную скорость и начальную смещение. Функция, возвращаемая
+GenDisplaceFn (), должна принимать один аргумент float64 t, представляющий
+время, и возвращать один аргумент float64, который представляет собой 
+перемещение, пройденное после времени t.
+
+Например, предположим, что я хочу предположить следующие значения для ускорения,
+начальной скорости и начальной смещение: a = 10, v o = 2, s o = 1. Я могу 
+использовать следующий оператор для вызова GenDisplaceFn () для сгенерируйте 
+функцию fn, которая будет вычислять смещение как функцию времени.
+
+f = GenDisplaceFn (10, 2, 1)
+
+Тогда я могу использовать следующую инструкцию, чтобы распечатайте смещение через 3 секунды.
+
+fmt.Println (fn (3))
+
+И я могу использовать следующий оператор для печати смещение через 5 секунд.
+
+fmt.Println (fn (5))
+

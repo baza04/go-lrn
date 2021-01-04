@@ -1,0 +1,27 @@
+﻿Moore's law 
+
+Moore's law is the observation that the number of transistors in a dense integrated circuit (IC) doubles about every two years. Moore's law is an observation and projection of a historical trend. Rather than a law of physics, it is an empirical relationship linked to gains from experience in production. Law contain few main concepts:
+	- Temperature increases as power increases.
+	- Power will increases as transistor density increases.
+	- Voltage scaling reduces (dynamic) power consumption.
+	- Voltage scaling cannot prevent leakage power loss.
+	- Voltage scaling is limited due to noise or threshold voltage.
+
+Moore's prediction has been used in the semiconductor industry to guide long-term planning and to set targets for research and development, thus functioning a bit like a self-fulfilling prophecy. Advancements in digital electronics, such as the reduction in quality-adjusted microprocessor prices, the increase in memory capacity (RAM and flash), the improvement of sensors, and even the number and size of pixels in digital cameras, are strongly linked to Moore's law. These step changes in digital electronics have been a driving force of technological and social change, productivity, and economic growth. 
+
+At the 1975 IEEE International Electron Devices Meeting, Moore revised his forecast rate, predicting semiconductor complexity would continue to double annually until about 1980, after which it would decrease to a rate of doubling approximately every two years. He outlined several contributing factors for this exponential behavior:
+
+    • The advent of metal–oxide–semiconductor (MOS) technology
+    • The exponential rate of increase in die sizes, coupled with a decrease in defective densities, with the result that semiconductor manufacturers could work with larger areas without losing reduction yields
+    • Finer minimum dimensions
+    • What Moore called "circuit and device cleverness"
+
+
+Microprocessor architects report that since around 2010, semiconductor advancement has slowed industry-wide below the pace predicted by Moore's law.[20] Brian Krzanich, the former CEO of Intel, cited Moore's 1975 revision as a precedent for the current deceleration, which results from technical challenges and is "a natural part of the history of Moore's law". The rate of improvement in physical dimensions known as Dennard scaling also ended in the mid-2000s. As a result, much of the semiconductor industry has shifted its focus to the needs of major computing applications rather than semiconductor scaling. Nevertheless, leading semiconductor manufacturers TSMC and Samsung Electronics have claimed to keep pace with Moore's law with 10 nm and 7 nm nodes in mass production and 5 nm nodes in risk production.
+
+
+Moore's Law is on its way to its decline due to some physical limitations, which are difficult to overcome in comparison with technological ones, here are a few of them:
+- Temperature increases as power increases.
+- Power increases as transistor density increases.
+- reducing the size of the transistor to increase the density on the board cannot be infinite,
+- a decrease in the size of transistors leads to a decrease in the dielectric layer, and this leads to current leakage, an increase in power and overheating, which in turn changes the vector of development of transistor technology. Now the main priority is the development towards the elimination of current leaks

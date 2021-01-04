@@ -1,0 +1,541 @@
+Если считаются хеш или что то в этом роде то это WaitGroup
+Если просто расчитывается какие то другие операции(перезапись чего то) то это  Mutex
+
+        ***     Asynch     ***
+
+CPU vs RAM
+    CPU very fast and RAM slow ->
+    -> add cache to CPU (little peace of memory, but more faster then RAM)
+    
+Context switch
+    CPU can exec only one process
+    scheduler switch processes by priority
+        when this happend CPU get Context from RAM (this is very slow and RAM is limited)
+
+1) Вытесняющая многозадачность 
+    cgi-bin
+        each request call new prog(new process, allocate some memory)
+        after exec done process will kill
+
+        minus:
+            if we had too many requests we will spend too many to:
+            create and killing processes or get to limit of memory
+
+
+2) Multithreading:
+    worker-pool
+        we have some number of processes which willn't kill after
+        exec, they will expect new ops(tasks or requests)
+
+    in this approach we will create only thread, not whole processes
+    threads are more lightweight, have access to memory of own process
+
+
+non-blocking I/O to all CPU cores (multithreading)
+
+
+        ***     Goroutines and Channels   ***
+
+run Goroutines by:
+    go func() {...}
+
+data sharing by:
+    ch := make(chan int)    // unbuffered channel -> store only one value
+                            // block after get value before someone read it
+                            // it'll be deadlock if sending more then reading
+                            // or opposite reading more then sending
+
+    ch <- 4                 // send data to channel
+    x := <- ch              // recieve data from channel
+
+we can send to funcs channels as parameter:
+    1) func (ch chan int) {}    // send and recieve
+    2) func (ch <-chan int) {}  // only sned
+    3) func (ch chan<- int) {}  // only read
+
+
+channel may be closed by:
+    func (ch chan int) {
+        ch <- 1     // send data
+        close(ch)   // close channel
+    }
+
+we can range value of channel but after sending last value we need to close it
+    func main() {
+        ch := make(chan int)
+
+        go func(ch chan<- int) {
+            for i := 0; i < 4; i++ {
+                ch <- i + 1
+            }
+            close(ch)       // closing
+        }(ch)
+        for value := range ch {
+            fmt.Printf("get from chan: %d\n", value)
+        }
+    }
+
+
+        ***    SELECT: Channels multiplexing   ***
+
+    func main() {
+        ch1 := make(chan int)
+        ch2 := make(chan int)
+    
+        select {
+            case v1 := <- ch1 {
+                fmt.Printf("chan1 get: %d", ch1)
+            case ch2 <- 2 {
+                fmt.Printf("chan2 send: 2")
+            // if all channels in select are blocked
+            // default will exec. 
+            default:                                
+                fmt.Printf("default case")
+
+                // if we haven't default case:
+                // !!! it'll be deadlock!!!
+            }
+        }
+
+
+	ch1 := make(chan int, 2)
+	ch2 := make(chan int, 1)
+	ch1 <- 1
+	ch1 <- 2
+	ch2 <- 3
+	for {
+		select {
+		case v1 := <-ch1:
+			fmt.Printf("chan1 get: %d\n", v1)
+		case v2 := <-ch2:
+			fmt.Printf("chan2 send: %d\n", v2)
+		default:
+			fmt.Printf("default case\n")
+			return
+		}
+	}
+
+    func main() {
+        cancelCh := make(chan struct{})
+        ch := make(chan int)
+
+        go func(ch chan int, cancelCh chan struct{}) {
+            val := 0
+            for {
+                select {
+                case <-cancelCh:
+                    return
+                case ch <- val:
+                    val++
+                }
+            }
+        }(ch, cancelCh)
+
+        for val := range ch {
+            fmt.Printf("read: %d\n", val)
+            if val > 3 {
+                fmt.Println("canceled")
+                cancelCh <- struct{}{}
+                break
+            }
+        }
+    }
+
+
+        ***   Multicore programming tools   ***
+
+time.NewTimer() // create timer which return chan when timer is end
+                // timer can be stopped by timer.Stop()
+
+time.After()    // return chan after selected time
+                // we can't stop time.After()
+
+    func main() {
+        timer1 := time.NewTimer(time.Second)	
+        select {
+        case <-time.After(time.Minute):			
+            fmt.Println("time.After is happend")
+        case <-timer1.C:
+            fmt.Println("timer is done")
+        case res := <-retChan():
+            if !timer1.Stop() {
+                <-timer1.C
+            }
+            fmt.Println(res)
+        }
+    }
+
+    func retChan() <-chan int {
+        ch := make(chan int)
+        ch <- 1
+        return ch
+    }
+
+time.Ticker()   // return chan where every selected interval send time 
+                // need to stopped
+
+    func main() {
+        ticker := time.NewTicker(time.Second)
+        i := 0
+        for tickTime := range ticker.C {
+            i++fmt.Println("step", i, "time", tickTime)
+            if i >= 5 {
+                // надо останавливать, иначе потечет
+                ticker.Stop()
+                break
+            }
+        }
+        fmt.Println("total", i)
+    }
+
+
+time.Tick()     // return chan with time every selected interval
+                // can't be stopped use when we not planned to stop it
+
+    func main() {
+        ticker := time.Tick(time.Second)
+        count := 0
+        for tick := range ticker {
+            fmt.Println("tic tak", count, tick)
+            count++
+            if count > 5 {
+                return
+            }
+        }
+    }
+
+time.AfterFunc()    // return timer which can be stopped
+                    // call given func after selected time
+    
+    func sayHello() {
+        fmt.Println("Hello World")
+    }
+    
+    func main() {
+        timer := time.AfterFunc(5*time.Second, sayHello)
+
+        fmt.Scanln()
+        timer.Stop()
+        fmt.Scanln()
+    }
+
+
+        ***    Context    ***
+
+context.WithCancel  // return context -> can be used to done other goroutines
+                    // return finish func -> send signal to end in context chan
+
+    func main() {
+        ctx, finish := context.WithCancel(context.Background())
+        result := make(chan int)
+
+        for i := 0; i < 10; i++ {
+            go worker(ctx, i, result)
+        }
+
+        val := <-result
+        fmt.Println("first result from:", val)
+        finish()
+    }
+
+    func worker(ctx context.Context, workerNum int, result chan<- int) {
+        waitTime := time.Duration(rand.Intn(100)+10) * time.Millisecond
+        fmt.Println(workerNum, "sleep", waitTime)
+
+        select {
+        case <-ctx.Done():
+            return
+        case <-time.After(waitTime):
+            fmt.Printf("worker %d done\n", workerNum)
+            result <- workerNum
+        }
+    }
+
+context.WithTimeout()   // return ctx and finish
+                        // get context and time(timeout) as parameter
+
+    waitTime := time.Millisecond * 50
+    ctx, _ := context.WithTimeout(context.Background, waitTime)
+
+    for {
+        select {
+            case <-ctx.Done():
+                break
+                fmt.Println("end of timeout")
+        }
+    }
+
+
+        ***    Async data recieving    ***
+
+garbage collector cant deallocated gorounting if chan blocked to read or writing
+
+but if channel is buffered and not blocked and func when chan is initiated is done
+it can be deallocated with garbage collector
+
+    func getComments() chan string {
+        // надо использовать буферизированный канал
+        result := make(chan string, 1)
+
+        go func(out chan<- string) {
+            time.Sleep(2 * time.Second)
+            fmt.Println("async operation ready, return comments")
+            out <- "32 комментария"
+        }(result)
+
+        return result
+    }
+    
+    func getPage() {
+        resultCh := getComments()
+
+        time.Sleep(1 * time.Second)
+        fmt.Println("get related articles")
+        return 
+        
+        commentsData := <-resultCh
+        fmt.Println("main goroutine:", commentsData)
+    }
+
+
+        ***    Workers pool    ***
+
+//  startWorker is waiting some task from input channel
+func startWorker(workerNum int, in <-chan string) {
+	for input := range in {
+		fmt.Printf(formatWork(workerNum, input))
+        
+        // runtime.Gosched() allow other gorountines work
+        // if it not range will work non-stop before
+        // channel not closed or other conditions
+        // alternation effect
+		runtime.Gosched() // попробуйте закомментировать
+	}
+
+	printFinishWork(workerNum)
+}
+
+
+func main() {
+    // buffer size allow to control order of gorountines
+    // if we set size more then 2, sending loop will end early
+    // sleeping time will not enought to all gorountines ending
+    // end they are end in random order
+    pullCh := make(chan struct{}, 2)
+
+    // run some num of gorountines then
+    // when we have request or task
+    // send it to chan
+    for i:=0; i<3; i++ {
+        go someFunc(pullCh chan struct{})
+    }
+    months := []string{"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"}
+
+	for _, monthName := range months {
+		worketInput <- monthName
+	}
+
+	// if we close chan, range loop in gorountines will end
+    // it may end all gorountines earlier then we expect 
+    close(worketInput) // попробуйте закомментировать
+	time.Sleep(time.Millisecond)
+}
+
+    
+        ***    Wait Groups    ***
+
+func startWorker(workerNum int, wg *sync.WaitGroup) {
+	defer wg.Done() // defer do operation anyway in end of func
+	for i := 0; i < 3; i++ {
+		fmt.Printf(formatWork(workerNum, i))
+		runtime.Gosched()
+	}
+	printFinishWork(workerNum)
+}
+
+func main() {
+	wg := &sync.WaitGroup{}
+
+	for i := 0; i < 3; i++ {
+
+        // we must increment WaitGroup counter before we start gorountine
+        // if we do in gorountine, program can come to wg.Wait() where
+        // counter still equal 0
+		wg.Add(1)
+		go startWorker(i, wg)
+	}
+	time.Sleep(time.Millisecond)
+    // wg.Wait() wait when counter will equal zero
+    // then go to next ops
+	wg.Wait()
+}
+
+
+        ***    Resource limit    ***
+
+    // make chan with 2 size buffer
+    // it allow to control how much gorountines
+    // work at the same time
+    quoteCh := make(chan struct{}, 2)
+
+    func startWorker(workerNum int, wg *sync.WaitGroup, quoteCh chan struct{}) {
+        // when gorountine start
+        // take place in queue 
+        quoteCh <- struct{}{}
+        defer wg.Done()
+        for i := 0; i < 7; i++ {
+            if i%2==0 {
+                <-quoteCh
+                quoteCh<-struct{}{}
+            }
+            fmt.Printf(formatWork(workerNum, i))
+            runtime.Gosched()
+        }
+        printFinishWork(workerNum)
+
+        // free queue
+        <-quoteCh
+    }
+
+
+        ***    Race condition    ***
+
+race conditions can be when we read and write 
+some value from map in few goroutines
+!! we can run file with -race flag to handle race conditions
+
+!!! map is unsave concurrency type
+
+
+        ***    sync.Mutex    ***
+
+func main() {
+	counters := make(map[int]int)
+    
+    // create pointer to Mutex
+    // we must use mutex only as pointer
+	mu := &sync.Mutex{}
+
+	for i := 0; i < 5; i++ {
+		go func(counters map[int]int, num int, mu *sync.Mutex) {
+
+			for i := 0; i < 5; i++ {
+
+                // lock mutex when we chage some variable in goroutine
+				mu.Lock()
+				counters[num*10+i]++
+                // lock mutex after done
+				mu.Unlock()
+			}
+		}(counters, i, mu)
+	}
+	time.Sleep(time.Millisecond * 100)
+
+	mu.Lock()
+	fmt.Printf("%v\n", counters)
+	mu.Unlock()
+}
+
+
+        ***    sync.Atomic    ***
+    
+    sync.Mutex -> used for big code,
+    but if we need use little part in our goroutines
+    we can use sync.Atomic (low level tools of mutex)
+
+        var globInt32 int32
+
+        func inc() {
+        	atomic.AddInt32(&globInt32, 1)
+        }
+
+        func main() {
+            for i := 0; i < 1000; i++ {
+                go inc()
+            }
+        }
+
+
+================================================================================================
+================================================================================================
+================================================================================================
+pkg time
+    - timer time.NewTimer(time.Second)
+      <-timer.C
+      timer.Stop()
+    - timer := time.After(time.Second*2)
+      <-timer.C
+      can't be stopped // do his work anyway
+
+    - ticker := time.NewTicker(time.Millisecond * 100)
+      <-ticker.C - send to chan event every selected time
+      ticker.Stop()
+    - tick := time.Tick(time.Minute)
+      count := 0
+      for interval := range ticker Printf {
+          ...
+      } // can't be stopped
+
+      timer := time.AfterFunc(time.Second*5), func(){ fmt.Println("Hello world") }
+
+pkg context
+    ctx, finish := context.WithCancel(context.Background())
+    signalChan := make(chan int)
+    go someFunc(ctx context, gorountinNum int, signalChan chan int) {
+        select {
+        case <-ctx.Done():
+            return
+        case <-time.After((time.Millisecond * rand.Intn*100)*10) // approximately code to rand pkg
+            signalChan <- gorountinNum  
+        }
+    }
+
+    select {
+        // if we get event from signalChan
+        // we'll end all other gorountines
+        case <-signalChan:
+            finish()
+    }
+
+    ctx, _ := context.WithTimeout(context.Background(), time.Second * 5)
+
+    select {
+        case <-ctx.Done() // event if timeout happend
+            fmt.Println("ended gorountines count:", count)
+        case <-signalChan:
+            count++
+    }
+
+Async data recieving
+    getComments() chan string {
+        result := make(chan string)     // create chan to send result of request
+        // result := make(chan int, 1)
+
+
+        // if we have some heavy work
+        // we can do it in new gorountine
+        go func(out chan<- string) {
+            ... // do some work of request
+            // after work done send result
+            out <- result
+        }(result)
+    }
+    getPage() {
+        resultChan := getComments()
+        // sleep some time, then get result
+
+
+        // but if we return getPage() before read from resultChan
+        // it'll be gorountine and memory leak
+        // garbage collector can't collect it
+        // cause chan is blocked to write cause chan not buffered
+        // chan have sync read write(only one value)
+        // but if we make a buffered chan, we'll haven't this problem
+
+        return
+        fmt.Println("comments data:", <-resultChan)
+    }
+
+
+
+

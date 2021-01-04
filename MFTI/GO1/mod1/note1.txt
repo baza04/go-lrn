@@ -1,0 +1,327 @@
+    *** Variables and Data Types ***
+
+Strings
+    concat is possible
+    can`t change symbol in string like:
+        str := "hello"
+        str[0] = "t"
+
+        byteLen := len(str)
+
+        count of symbols:
+        symbolsNum := utf8.RuneCountInString(str)
+
+        or cast type runes := []rune(str)
+        symbolsNum = len(runes)
+
+Const
+    const c string
+    can init one or more in block
+    const (
+        x,y int
+    )
+
+iota -> autoincrement for const's
+    const (
+        zero = iota
+        one
+        _                               // skip str
+        KB  uint64 = 1 << (10 * iota)   // 1024
+        MB                              // 1048576
+
+
+    Untyped const
+        const (
+            x = 1
+            y int = 2
+        )
+
+        func () {
+            var i int32 = 3
+            x + i // not problem
+            y + i // mismatch types int and int32
+        }
+Type Creating
+
+type UserID int
+
+func main() {
+    var x UserID
+    y := 4
+    x = 3
+
+    z := UserID(y)
+}
+
+Golang hasn't address arithmetics
+    that mean you can't add value to pointer and get pointer to another variable
+    pointer is special type in golang
+
+    a := 2
+    b := &a     // b store address to a variable
+    *b = 3       // a = 3, *b -> pointer to a
+
+    // get pointer to new int variable
+    c := new(int)
+
+Maps
+
+    m := make(map[string]int, 10)
+	m1 := map[string]int{
+		"Sam": 1,
+		"Zoe": 2,
+	}
+	m["axe"] = 1
+
+	fmt.Println(len(m), m1)
+
+	if c, ok := m1["axe"]; ok {
+		fmt.Println(c)
+	} else {
+		fmt.Println("axe not 'name' exist")
+	}
+
+    *** Control constructions ***
+
+Switch
+    str := "name"
+
+    switch str {
+        case "name":
+            fallthrough             // desabled break
+        case "test", "lastName":    // few cases
+            // something
+    }
+    
+    x, y := 1, 2
+    switch {
+        case x == 1:
+            fallthrough             // desabled break
+        case x == 1, y == 2:    // few cases
+            // something
+    }
+
+Loop:
+	x, y := 10, 2
+	for {
+		switch {
+		case x == 1:
+			break
+			fallthrough // desabled break
+		case x != 1 && y == 2: // few cases
+			fmt.Println("instance", x)
+			break Loop
+			// something
+		}
+	}
+
+For Loop
+    for (init block; condition block; increment){
+        equipment
+    }1
+
+
+    *** Functions ***
+
+Anon:
+    func(str string) {
+        fmt.Println(str)
+    }("hello")
+
+Funcs as vars:
+    fVar := func(str string){}
+
+Type Func:
+    type strFuncType func(string, string) (string, err)
+
+Use FuncType:
+    worker := func(callback strFuncType) {
+        callback("call", "back")
+    }
+
+    prefix := func(str string) strFuncType {
+        return func (a, b string) (string, error) {
+            return a, nil
+        }
+    }
+
+defer:
+    go service func
+        do script in line after key word "defer"
+
+    if defer init more then one:
+        exec in decrease order
+
+panic:
+    crash all programm
+    but "defer" will work, even panic is happend
+
+recover func:
+    recover func is catch err in panic or else and prevent code crashing
+
+    defer func() {
+        if err := recover(); err != nil {
+            fmt.Println("panic value:", err)
+        }
+    }
+
+    panic(fmt.Errorf("something happend"))
+
+
+    *** Structs ***
+
+    type person struct {
+        name, lastname string
+        Data Account    // use as value
+        Account         // use as part of person struct
+                        // person struct have all fields of Account
+    }
+
+    func () {
+        // particular apropriate must used field names, 
+        // but shouldn`t apropriate all fields value
+        Sam := person{
+            name: "Sam"
+        }
+
+        Megan := person{"Megan", "Fox"}
+    }
+
+
+    *** Methods ***
+    
+type can be any type not only struct
+    parent struct can call methods of childs to change child fields
+    if hasn`t self, opposite it change fields of parents
+
+    type MySlice []int
+
+    func (sl *MySlice) increment() {
+        for index := range sl {
+            *sl[index]++
+        }
+    }
+
+
+    *** Packages ***
+
+GOPATH
+    path to go folders(bin, pkg, src)
+    
+    
+    *** Intefaces ***
+
+Variables can have type interface
+    that variables can be put to some Funcs
+
+Struct to inteface if that have the same methods
+
+Type Switch
+
+    func Buy(p Payer) {
+        switch p.type {
+            case *Card:
+                plasticCard, ok := p.(*Card); ok {
+                        fmt.Println("Please Input Card")
+                } else {
+                    ...
+                }
+            case *Wallet: 
+                ...
+            defeault: 
+                ...
+        }
+
+        someOps...
+
+    }
+
+
+    *** Empty Intefaces ***
+
+func Buy(in interface{}) {
+    var p Payer
+    // try cast to Payer interface
+    if p, ok := in.(Payer); !ok {   
+        fmt.Printf("Error")
+        return
+    }
+}
+
+total code about interface
+    
+    type Payer interface {
+        Pay(int) error
+    }
+
+    type Wallet struct {
+        cash int
+    }
+
+    func (w *Wallet) Pay(amount int) error {
+        if w.cash > amount {
+            w.cash -= amount
+            fmt.Println("Payment success!")
+            return nil
+        }
+        return fmt.Errorf("cash in not enough")
+    }
+
+    type Card struct {
+        Balance                             int
+        ValidUntil, Cardholder, CVV, Number string
+    }
+
+    func (c *Card) Pay(amount int) error {
+        if c.Balance < amount {
+            return fmt.Errorf("Не хватает денег на карте")
+        }
+        c.Balance -= amount
+        return nil
+    }
+
+    func Buy(in interface{}) {
+        var p Payer
+        var ok bool
+        if p, ok = in.(Payer); !ok {
+            fmt.Printf("%T не не является платежным средством\n\n", in)
+            return
+        }
+        err := p.Pay(10)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Printf("Спасибо за покупку через %T\n\n", p)
+    }
+
+    func main() {
+        myWallet := &Wallet{cash: 100}
+        Buy(myWallet)
+
+        var myMoney Payer
+        myMoney = &Card{Balance: 100, Cardholder: "rvasily"}
+        Buy(myMoney)
+
+        // myMoney = &ApplePay{Money: 9}
+        // Buy(myMoney)
+    }
+
+
+    *** Composite Intefaces ***
+
+    type Payer interface {
+        Pay(int) error
+        }
+        
+    type Ringer interface {
+        Ring(string) error
+    }
+    
+    type NFCPhone interface {
+        Payer
+        Ringer
+    }
+
+
+    *** Uneque app ***
+

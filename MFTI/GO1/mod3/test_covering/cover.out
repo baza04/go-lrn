@@ -1,0 +1,6 @@
+mode: set
+MFTI_GO1/mod3/test_covering/main.go:17.41,18.34 1 1
+MFTI_GO1/mod3/test_covering/main.go:26.2,26.45 1 1
+MFTI_GO1/mod3/test_covering/main.go:18.34,21.17 3 1
+MFTI_GO1/mod3/test_covering/main.go:24.3,24.19 1 1
+MFTI_GO1/mod3/test_covering/main.go:21.17,23.4 1 1

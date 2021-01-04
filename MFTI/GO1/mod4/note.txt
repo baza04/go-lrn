@@ -1,0 +1,291 @@
+    *** TCP Server *** 
+
+Create tcp server:
+
+func main() {
+    listener, err := net.Listen("tcp", ":port")
+    ...
+
+    // listen server input
+    for {
+        conn, err := listener.Accept()
+        if err != ... 
+
+        // handleConnection must be run in async to work with few connections
+        go handleConnection(conn)
+    }
+}
+
+func handleConnection(conn net.Conn) {
+    name := conn.RemoteAddtr().String() // set name as ip
+    
+    // show other participants in server name of connected user
+    fmt.Printf("%+v connected\n", name)
+    // conn.Write() write mssg only for current user
+    conn.Write([]byte("Hello, " + name + "\n\r"))
+
+    defer conn.Close()
+
+    // scanner for input reading
+    scanner := bufio.NewScanner(conn)
+    for scanner.Scan() {
+        text := scanner.Text()
+        if text == "Exit" { // stop listening for this user
+            conn.Write([]byte("Bye\n\r"))
+            fmt.Println(name, "disconnected")
+            break
+        } else if text != "" {
+            fmt.Println(name, "enters", text)
+            conn.Write([]byte("You enter " + text + "\n\r"))
+        }
+    }
+}
+
+
+    *** HTTP Server *** 
+    
+    *** Simple http server ***
+
+func main() {
+    http.HandleFunc("/", rootHanle) // route root url
+
+    fmt.Println("Listening port: 8080")
+    http.ListenAndServe(":8080", nil) // listen port
+}
+
+func rootHanle(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Hello, world") // write to w response writer object
+    w.Write([]byte("another way to pass some data to page))
+}
+
+    *** Routing: ***
+
+func main() {
+    http.HandleFunc("/pages/", func(w http.ResponseWriter, r *http.Request){
+        fmt.Fprintln("all pages with url localhost:8080/pages/...")
+    })
+
+    http.HandleFunc("/page", func(w http.ResponseWriter, r *http.Request){
+        fmt.Fprintln("only one page with url localhost:8080/page")
+    })
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+        fmt.Fprintln("all other urls localhost:8080/...")
+    })
+
+    fmt.Println("Listening port: 8080")
+    http.ListenAndServe(":8080", nil)
+}
+
+
+    *** ServeHTTP work with structs ***
+
+type Handler struct {
+    Name string
+}
+
+// ServeHTTP is method which can handle request for few URL's
+// and work with structs and other types 
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r http.Request) { 
+    fmt.Fprintf(w, "Handler name: %s, URL: %s", h.Name, r.URL.String())
+}
+
+func main() {
+    testHandler := Handler{Name: "test"}
+    http.Handle("/test/", testHandler)
+
+    rootHandler := Handler{Name: "root"}
+    http.Handle("root", rootHanle)
+
+    fmt.Println("Listening port: 8080")
+    http.ListenAndServe(":8080", nil)
+}
+
+
+    *** ServeMux ***
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "serve Mux")
+}
+
+func main() {
+    // simple http.HandleFunc use deafult global multiplex
+    // but we can use custom mux
+	mux := http.NewServeMux()   // create mux
+	mux.HandleFunc("/", rootHandler)    
+
+    // customization
+	server := http.Server{
+		Addr:         ":8080",  // port
+		Handler:      mux,      // mux
+		ReadTimeout:  10 * time.Second, 
+		WriteTimeout: 10 * time.Second,
+	}
+	server.ListenAndServe()
+}
+
+note: we can create few different mux to different handling
+    
+    
+    *** Query parameters parsing ***
+
+Parsing parameters from GET methods
+
+// query params can be parsed by few ways
+func handler(w http.ResponseWriter, r *http.Request) {
+	// 1st way from URL by Query func (only for GET method)
+	myParam := r.URL.Query().Get("param")
+	if myParam != "" { // return "" if not found parameter
+		fmt.Fprintf(w, "`myParam` is %s\n", myParam)
+	}
+
+	// 2nd way from r (Request object) by FromValue func
+	key := r.FormValue("key") // also can be user to ResponseWriter
+	if key != "" {            // return "" if not found parameter
+		fmt.Fprintf(w, "`key` is: %s\n", key)
+	}
+}
+
+func main() {
+	http.HandleFunc("/", handler)
+
+	fmt.Println("starting server at: 8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+Parsing parameters from POST methods
+
+func mainPage(w http.ResponseWriter, r *http.Request) {
+	// will print login tmpl if method is not POST
+	if r.Method != http.MethodPost {
+		w.Write(loginFormTmpl)
+		return
+	}
+
+	// if method is POST we will work with request parameters
+	// we can get data from request by ourself
+	// or user func FormValue
+
+	/*
+		r.ParseForm()  						// Parse form
+		inputLogin := r.Form["login"][0]	// get data from parsed form
+	*/
+
+	// FormValue return data from all methods GET or POST
+	// but POST method have more priority
+	inputLogin := r.FormValue("login")
+	fmt.Fprintf(w, "you enter: %s\n", inputLogin)
+}
+func main() {
+	http.HandleFunc("/", mainPage)
+
+	fmt.Println("starting server at :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+    *** Cookies ***
+
+func mainPage(w http.ResponseWriter, r *http.Request) {
+	// get Cookie from request
+	session, err := r.Cookie("session_id")
+	// check logged status
+	loggedIn := (err != http.ErrNoCookie)
+
+	if loggedIn { // if logged show link to logout
+		fmt.Fprintf(w, `<a href="/logout">logout</a>`)
+		fmt.Fprintf(w, "Welcome, %v", session.Value)
+	} else { // if not show link to login
+		fmt.Fprintf(w, `<a href="/login">login</a>`)
+		fmt.Fprintf(w, "You need to login")
+	}
+}
+
+func loginPage(w http.ResponseWriter, r *http.Request) {
+	// init expiration time for cookie when logged
+	expiration := time.Now().Add(10 * time.Hour)
+	// create Cookie
+	cookie := http.Cookie{
+		Name:     "session_id",
+		Value:    "baza04",
+		Expires:  expiration,
+		HttpOnly: true,
+	}
+	// set cookie
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func logoutPage(w http.ResponseWriter, r *http.Request) {
+	// get cookie by name
+	session, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	session.Expires = time.Now().AddDate(0, 0, -1)
+	http.SetCookie(w, session)
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func main() {
+	http.HandleFunc("/login", loginPage)
+	http.HandleFunc("/logout", logoutPage)
+	http.HandleFunc("/", mainPage)
+
+	fmt.Println("starting server at :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+    *** Headers ***
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	// set some Header
+	w.Header().Set("RequestID", "lyalyalya...lya")
+
+	// get UserAgent info
+	fmt.Fprintf(w, "You browser is: %s\n\n", r.UserAgent())
+	fmt.Fprintf(w, "You accept %s\n", r.Header.Get("Accept"))
+}
+
+func main() {
+	http.HandleFunc("/", handler)
+
+	fmt.Println("starting server at :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+    *** Static Files Handling ***
+
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(`
+	<img src="/static/img/gopher.png" />
+`))
+}
+
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handler)
+
+	// static files parser(handler) first args like link to next calling
+	// http.Dir  read static files
+	static := http.StripPrefix("/data/",
+		http.FileServer(http.Dir("./static")),
+	)
+	// parse static files
+	http.Handle("/data/", static)
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+	fmt.Println("starting server at :8080")
+	server.ListenAndServe()
+}
+
+
+    *** File Upload ***
+

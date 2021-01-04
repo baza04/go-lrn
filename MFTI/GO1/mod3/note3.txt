@@ -1,0 +1,133 @@
+        ***    Unmarshal JSON    ***
+
+Unmarshal json object with default names of structs
+
+    type User struct {
+        ID       int
+        Username string
+        phone    string
+    }
+
+    var jsonStr = `{"id":42, "username": "baza04", "phone": "132"}`
+
+    func main() {
+        data := []byte(jsonStr)
+
+        u := &User{}
+        json.Unmarshal(data, u)
+        fmt.Printf("struct: \n\t%#v\n\n", u)
+
+        u.phone = "978163"
+        result, err := json.Marshal(u)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Printf("json string: \n\t%s\n", string(result))
+    }
+
+    struct is template for json object
+        if some field of struct named in lower case
+        it will give permission only for funcs or methods in this pkg
+        and pkg "encoding/json" haven`t permisson for this field
+
+Unmarshal json object with customized fields named
+    type User struct {
+        ID       int `json:"user_id,string"`
+        Username string
+        Address  string `json:",omitempty"`
+        Company  string `json:"-"`
+    }
+
+    func main() {
+        u := &User{
+            ID:       4,
+            Username: "Make",
+            Address:  "050000",
+            Company:  "01 alem",
+        }
+
+        result, err := json.Marshal(u)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Printf("json string:\t%s\n", string(result))
+    }
+
+If don`t know what name of fields in JSON
+
+    var jsonStr = `[
+        {"id":17, "username": "iivan", "phone": 0},
+        {"id":"18", "address": "none", "company": "alem"}	
+    ]`
+
+    func main() {
+        data := []byte(jsonStr)
+
+        var user1 interface{}
+        json.Unmarshal(data, &user1)
+        fmt.Printf("unpacked in empty interface:\n%#v\n\n", user1)
+    }
+
+If we want
+    user2 := map[string]interface{}{
+		"id":       42,
+		"username": "make",
+	}
+	var user2i interface{} = user2
+	result, err := json.Marshal(user2i)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("JSON from inteface: %s\n", result)
+
+
+        ***    Dynamic Data    ***
+
+reflection  do some work in runtime
+    new to use pkg reflection
+
+code generation
+    work faster then reflection, but need write and debug some 
+     
+     
+        ***    Benchmarks    ***
+
+Benchmarks check programs effiency, work like tests
+
+Benchmarks func name start with "Benchmark"
+
+go test - bench . -benchmem
+
+
+        ***    CPU and Memory Prfiling    ***
+
+go test -bench . -cpuprofile=cpu.out -memprofile=mem.out -memprofilerate=1  // save bin of stacktracing
+
+go tool pprof mem.out   // open mem trace file
+go tool pprof cpu.out   // open cpu trave file
+
+trace commands:
+    top                 // show top 10 of procces
+    list <func name>    // show procces trace of curr func
+
+    web                 create svg file -> open browser
+
+        ***    Sync Pool    ***
+
+-тест на аллоцирование памяти при каждой операции и при аллоцировании один раз в пул с последующим использованием пула
+go test -bench . -benchmem pool_test.go
+
+память выделяется в пуле (в нем мы определили какой тим данных и какой размер памяти нам необходим)
+	когда необхдимо мы берем выделенную память из пула
+	используем в программе, очищаем через Reset()
+	и возвращаем обратно в пул
+
+
+        ***    Test Covering    ***
+
+go test
+	-v 		показывает запущенный тест и его результат
+	-cover  показывает степень покрытия кода тестами
+
+go test -coverprofile=cover.out 				экспорт профилированных результатов в файл
+go tool cover -html=cover.out -o cover.html 	конвертация в html
